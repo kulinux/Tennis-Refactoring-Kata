@@ -1,11 +1,19 @@
 package tennis
 
-case class Player(name: String, score: Int)
+case class Game(player1: Game.Player, player2: Game.Player) {
 
-case class Game(player1: Player, player2: Player) {
-  def overForty(): Boolean = player1.score >= 4 || player2.score >= 4
+  def player1Score() = player1.score
+  def player2Score() = player2.score
 
-  def sameScore(): Boolean = player1.score == player2.score
+  def pointsStatus(): Game.PuntuationStatus = {
+    def overForty(): Boolean = player1.score >= 4 || player2.score >= 4
+    def sameScore(): Boolean = player1.score == player2.score
+
+    import Game.PuntuationStatus._
+    if (sameScore()) SameScore
+    else if (overForty()) OverForty
+    else Normal
+  }
 
   def score(playerName: String): Game = {
     if (playerName == player1.name)
@@ -19,8 +27,34 @@ case class Game(player1: Player, player2: Player) {
   }
 }
 object Game {
+  enum PuntuationStatus {
+    case SameScore, OverForty, Normal
+  }
+  private[Game] case class Player(name: String, score: Int)
   def apply(player1Name: String, player2Name: String): Game =
     Game(Player(player1Name, 0), Player(player2Name, 0))
+}
+
+class TennisGame1(player1Name: String, player2Name: String) extends TennisGame {
+
+  private var game = Game(player1Name, player2Name)
+
+  def wonPoint(playerName: String): Unit = {
+    game = game.score(playerName)
+  }
+
+  def calculateScore(): String = {
+    import Game.PuntuationStatus._
+    import Formatter._
+    game.pointsStatus() match {
+      case SameScore => formatSameScore(game.player1Score())
+      case OverForty =>
+        formatOverForty(game.player1Score() - game.player2Score())
+      case Normal =>
+        simpleFormat(game.player1Score()) + "-" + Formatter
+          .simpleFormat(game.player2Score())
+    }
+  }
 }
 
 object Formatter {
@@ -45,26 +79,4 @@ object Formatter {
       case 2 => "Thirty"
       case 3 => "Forty"
     }
-}
-
-class TennisGame1(player1Name: String, player2Name: String) extends TennisGame {
-
-  var game = Game(player1Name, player2Name)
-
-  def wonPoint(playerName: String): Unit = {
-    game = game.score(playerName)
-  }
-
-  def calculateScore(): String = {
-    if (game.sameScore()) {
-      Formatter.formatSameScore(game.player1.score)
-    } else if (game.overForty()) {
-      Formatter.formatOverForty(game.player1.score - game.player2.score)
-    } else {
-      Formatter.simpleFormat(game.player1.score) +
-        "-" +
-        Formatter.simpleFormat(game.player2.score)
-    }
-  }
-
 }
