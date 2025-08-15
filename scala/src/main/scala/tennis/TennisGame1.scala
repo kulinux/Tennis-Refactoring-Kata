@@ -57,23 +57,13 @@ class TennisGame1(player1Name: String, player2Name: String) extends TennisGame {
 
   def calculateScore(): String = {
     if (game.sameScore()) {
-      return Formatter.formatSameScore(game.player1.score)
+      Formatter.formatSameScore(game.player1.score)
     } else if (game.overForty()) {
-      val minusResult = game.player1.score - game.player2.score
-      return Formatter.formatOverForty(minusResult)
+      Formatter.formatOverForty(game.player1.score - game.player2.score)
     } else {
-      var score: String = ""
-      var tempScore = 0
-      for (i <- 1 until 3 by 1) {
-
-        if (i == 1) tempScore = game.player1.score
-        else { score += "-"; tempScore = game.player2.score; }
-
-        val tempScore2 = Formatter.simpleFormat(tempScore)
-
-        score += tempScore2
-      }
-      return score
+      Formatter.simpleFormat(game.player1.score) +
+        "-" +
+        Formatter.simpleFormat(game.player2.score)
     }
   }
 
