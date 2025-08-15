@@ -11,3 +11,9 @@ target
 .project
 .classpath
 .settings/
+
+.bloop/
+.bsp/
+.metals/
+
+
