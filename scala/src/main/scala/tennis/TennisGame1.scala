@@ -16,9 +16,9 @@ case class Game(player1: Game.Player, player2: Game.Player) {
   }
 
   def score(playerName: String): Game = {
-    if (playerName == player1.name)
+    if (Game.Types.PlayerName(playerName) == player1.name)
       Game(player1.copy(score = player1.score + 1), player2)
-    else if (playerName == player2.name)
+    else if (Game.Types.PlayerName(playerName) == player2.name)
       Game(player1, player2.copy(score = player2.score + 1))
     else
       throw UnsupportedOperationException(
@@ -30,9 +30,20 @@ object Game {
   enum PuntuationStatus {
     case SameScore, OverForty, Normal
   }
-  private[Game] case class Player(name: String, score: Int)
+  private[Game] case class Player(name: Types.PlayerName, score: Int)
+
+  object Types {
+    opaque type PlayerName = String
+    object PlayerName {
+      def apply(name: String): PlayerName = name
+    }
+  }
+
   def apply(player1Name: String, player2Name: String): Game =
-    Game(Player(player1Name, 0), Player(player2Name, 0))
+    Game(
+      Player(Types.PlayerName(player1Name), 0),
+      Player(Types.PlayerName(player2Name), 0)
+    )
 }
 
 class TennisGame1(player1Name: String, player2Name: String) extends TennisGame {
