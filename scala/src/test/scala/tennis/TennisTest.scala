@@ -1,15 +1,10 @@
 package tennis
 
-import org.junit.Assert._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatest.matchers.should.Matchers
 
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
-import java.util
-
-@RunWith(classOf[Parameterized])
-class TennisTest(params: TennisTestCase) {
+class OneCaseTennisTest(params: TennisTestCase) extends Matchers {
 
   def checkScores(game: TennisGame): Unit = {
     val highestScore = Math.max(params.player1Score, params.player2Score)
@@ -19,22 +14,19 @@ class TennisTest(params: TennisTestCase) {
       if (i < params.player2Score)
         game.wonPoint("player2")
     }
-    assertEquals(params.expectedScore, game.calculateScore())
+    params.expectedScore shouldBe game.calculateScore()
   }
 
-  @Test
   def checkGame1(): Unit = {
     val game = new TennisGame1("player1", "player2")
     checkScores(game)
   }
 
-  @Test
   def checkGame2(): Unit = {
     val game = new TennisGame2("player1", "player2")
     checkScores(game)
   }
 
-  @Test
   def checkGame3(): Unit = {
     val game = new TennisGame3("player1", "player2")
     checkScores(game)
@@ -42,12 +34,10 @@ class TennisTest(params: TennisTestCase) {
 
 }
 
-object TennisTest {
-  @Parameters(name = "{0}")
-  def getAllScores(): java.util.Collection[Array[TennisTestCase]] = {
-    var list = new util.ArrayList[Array[TennisTestCase]]();
-
-    val args = Array(
+class TennisTest extends AnyFlatSpec with TableDrivenPropertyChecks {
+  def getAllScores() =
+    Table(
+      ("test case"),
       new TennisTestCase(0, 0, "Love-All"),
       new TennisTestCase(1, 1, "Fifteen-All"),
       new TennisTestCase(2, 2, "Thirty-All"),
@@ -82,7 +72,23 @@ object TennisTest {
       new TennisTestCase(16, 14, "Win for player1"),
       new TennisTestCase(14, 16, "Win for player2")
     )
-    args.foreach(n => list.add(Array(n)))
-    return list
+
+  it should "check game 1" in {
+    forAll(getAllScores()) { params =>
+      val test = new OneCaseTennisTest(params)
+      test.checkGame1()
+    }
+  }
+  it should "check game 2" in {
+    forAll(getAllScores()) { params =>
+      val test = new OneCaseTennisTest(params)
+      test.checkGame2()
+    }
+  }
+  it should "check game 3" in {
+    forAll(getAllScores()) { params =>
+      val test = new OneCaseTennisTest(params)
+      test.checkGame3()
+    }
   }
 }
